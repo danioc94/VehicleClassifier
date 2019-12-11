@@ -1,2 +1,2 @@
 # VehicleClassifier
-Vehicle Classifier using TensorFlow CNN's. Currently has predicated functions and will be updated soon.
+Vehicle Classifier using TensorFlow CNN's. Code is currently deprecated and will be updated soon.
