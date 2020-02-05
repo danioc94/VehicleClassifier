@@ -8,7 +8,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 # config
 learning_rate = 0.01
 training_epochs = 5
-num_examples = 500
+num_examples = 10
 num_train = int(0.95*num_examples)
 num_test = int(0.05*num_examples)
 
@@ -32,11 +32,11 @@ def read_my_list( minId, maxId, folder ):
 
     for num in range( minId, maxId+1 ):
         # Positive:
-        filenames.append( "d:/Documents/Repositories/CarClassifier/" + folder + "/Positive/" + name_si( num ) + ".jpg" )
+        filenames.append( "d:/Documents/Repositories/VehicleClassifier/CarClassifier/" + folder + "/Positive/" + name_si( num ) + ".jpg" )
         labels.append( int( 1 ) )
         
         #Negative
-        filenames.append( "d:/Documents/Repositories/CarClassifier/" + folder + "/Negative/" + name_no( num ) + ".jpg" )
+        filenames.append( "d:/Documents/Repositories/VehicleClassifier/CarClassifier/" + folder + "/Negative/" + name_no( num ) + ".jpg" )
         labels.append( int( 0 ) )
         
         print( num_name(num) )
@@ -102,7 +102,7 @@ def fill_feed_dict(image_batch, label_batch, imgs, lbls):
 # tf Graph input
 x = tf.compat.v1.placeholder(tf.float32, [None, IMAGE_PIXELS])
 y_ = tf.compat.v1.placeholder(tf.float32, [None, NUM_CLASSES])
-keep_prob = tf.placeholder(tf.float32) #dropout (keep probability)
+keep_prob = tf.compat.v1.placeholder(tf.float32) #dropout (keep probability)
 
 
 # Create some wrappers for simplicity
@@ -159,10 +159,10 @@ weights = {
 }
 
 biases = {
-    'bc1': tf.Variable(tf.random_normal([32]),name='bc1'),
-    'bc2': tf.Variable(tf.random_normal([64]),name='bc2'),
-    'bd1': tf.Variable(tf.random_normal([128]),name='bd1'),
-    'out': tf.Variable(tf.random_normal([NUM_CLASSES]),name='out2')
+    'bc1': tf.Variable(tf.random.normal([32]),name='bc1'),
+    'bc2': tf.Variable(tf.random.normal([64]),name='bc2'),
+    'bd1': tf.Variable(tf.random.normal([128]),name='bd1'),
+    'out': tf.Variable(tf.random.normal([NUM_CLASSES]),name='out2')
 }
 
 
@@ -207,7 +207,7 @@ image_batch_test, label_batch_test = tf.train.batch( [ image_test, label_test ],
 saver=tf.compat.v1.train.Saver()
 with tf.compat.v1.Session() as sess:
     # variables need to be initialized before we can use them
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.compat.v1.global_variables_initializer())
     
     coord = tf.train.Coordinator()
     threads = tf.train.start_queue_runners(coord=coord)
@@ -217,17 +217,21 @@ with tf.compat.v1.Session() as sess:
     
         # number of batches in one epoch
         batch_count = int(num_train/BATCH_SIZE)
+        im_x = 0
+        lb = 0
         
         for i in range(batch_count):
 
             imgs, lbls = sess.run([image_batch, label_batch])
+            img_x = imgs
+            lb = lbls
 
             sess.run(optimizer,feed_dict={x: imgs, y_: lbls, keep_prob: dropout})
     
         print ("Epoch: ", epoch)
 
         imgs_test, lbls_test = sess.run([image_batch_test, label_batch_test])
-        print ("Training Accuracy: ", accuracy.eval(feed_dict={x: imgs , y_: lbls, keep_prob: dropout}))
+        print ("Training Accuracy: ", accuracy.eval(feed_dict={x: im_x , y_: lb, keep_prob: dropout}))
         print ("Test Accuracy: ", accuracy.eval(feed_dict={x: imgs_test , y_: lbls_test, keep_prob: dropout}))
         #print ("Correct prediction: ", correct_pred.eval(feed_dict={x: imgs_test , y_: lbls_test, keep_prob: dropout}))
 
